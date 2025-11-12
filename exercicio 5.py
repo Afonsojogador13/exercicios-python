@@ -1,0 +1,6 @@
+lalala = int(input("qual a altura"))
+meu_pc = int(input("e o comprimento"))
+idk = round(meu_pc*lalala,2)
+litros = round(idk/2,2)
+print()
+print("Sua parede tem",idk,"m2 e precisará de",litros,"litros de tinta")
