@@ -1,0 +1,20 @@
+#LDT i miss you...abs
+from datetime import date
+from time import sleep
+
+def VerificarAlistamento():
+    year = date.today().year
+    yourAge = int(input("em que ano nasceste?"))
+    anosQueTens = year - yourAge
+
+    if anosQueTens > 18:
+        print("tu és demasiado velho para o recenseamento")
+    elif anosQueTens < 18:
+        print("ainda podes ir para o repo- quero dizer... hmm... recenseamento, aos 18 anos.")
+    else:
+        print("podes ir para o repo- quero dizer...")
+        sleep(5)
+        print("recenseamento")
+        
+VerificarAlistamento()
+        
