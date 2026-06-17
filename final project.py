@@ -1,38 +1,78 @@
 #eyes-watching-from-the-darkness-scary-stories-120cbdacf74c
-import tkinter as ttk
-from tkinter import messagebox
-from time import sleep
-from tkinter import *
-from tkinter import messagebox
-import os
-import folium
-from PIL import Image, ImageTk
-import requests
-from datetime import datetime
-from io import BytesIO
 import tkinter as tk
+from tkinter import messagebox, ttk
+import random
+import folium
+import requests
+import os
+from datetime import datetime
+from PIL import Image, ImageTk
+from io import BytesIO
+from time import sleep
+
+API_KEY = "3b3ddc5f98b8f6502b43eea92f40a73d"
+BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
+ICON_URL = "http://openweathermap.org/img/wn/"
+caminhoDoScript = os.path.dirname(os.path.abspath(__file__))
+os.chdir(caminhoDoScript)
+
+def limparJanela():
+    for widget in janela.winfo_children():
+        widget.destroy()
+
+board = ['' for _ in range(9)]
+buttons = []
+
+def jogoDoGalo():
+    limparJanela()
+    janela.title("Jogo do Galo")
+
+    tk.Label(janela, text='Ganha ao Computador!', font=("Arial", 14)).pack(pady=10)
+
+    areaJogo = tk.Frame(janela)
+    areaJogo.pack()
+
+    global board, buttons
+    board = ['' for _ in range(9)]
+    buttons = []
+
+    for i in range(9):
+        button = tk.Button(areaJogo, text='', font=('normal', 40), width= 5, height= 2, command=lambda i=i: ClicaBotao(i))
+        button.grid(row=i//3, column=i%3)
+        buttons.append(button)
 
 def ClicaBotao(index):
-    global jogadorAtual, board, buttons
-    if board[index] == '':
-        board[index] = jogadorAtual
-        buttons[index].config(text=jogadorAtual)
-        if VerificaVencedor():
-            messagebox.showinfo("Fim de jogo lol lol lol lol lol lol", f"jogador {jogadorAtual} venceu karai!")
-            sleep(5)
-            abrir_nova_janela()
-            Reset()
-        elif '' not in board:
-            messagebox.showinfo("Fim do jogo","Empate")
-            sleep(5)
-            imagemPatch = "eyes-watching-from-the-darkness-scary-stories.png"
+    global board, buttons
 
-            Reset()
-        else:
-            if jogadorAtual == 'X':
-                jogadorAtual = '0'
-            else:
-                jogadorAtual = 'X'
+    if board[index] == '':
+
+        board[index] = "X"
+        buttons[index].config(text="X")
+
+        if VerificaVencedor():
+            messagebox.showinfo("Fim de jogo lol lol lol lol lol lol", f"Venceu karai!")
+            limparJanela()
+            labelImagem = tk.Label(janela)
+            # if os.path.exists("transferir.jpg"):
+            #     imagem = tk.PhotoImage(file="transferir.jpg")
+            #     labelImagem.config(image=imagem)
+            #     labelImagem.image = imagem
+            #     sleep(4)
+            imc()
+            return
+        espacos_vazios = []
+        for i in range(9):
+            if board[1] == '':
+                espacos_vazios.append(i)
+
+        if espacos_vazios:
+            jogadas_pc = random.choice(espacos_vazios)
+            board[jogadas_pc] = '0'
+            buttons[jogadas_pc].config(text='0')
+
+            if VerificaVencedor():
+                messagebox.showinfo("Fim de jogo", "O Computador venceu! Tenta de novo.")
+                Reset()
 
 def VerificaVencedor():
     combinacoes = [
@@ -46,173 +86,93 @@ def VerificaVencedor():
     return False
 
 def Reset():
-    global board, buttons, jogadorAtual
+    global board
     board = ['' for _ in range(9)]
     for button in buttons:
         button.config(text='')
-    jogadorAtual = 'X'
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    root.title("jogo do galo")
+def imc():
+    limparJanela()
+    janela.title("TUA SAUDE.EXE FR FR")
 
-    jogadorAtual = 'X'
-    board = ['' for _ in range(9)]
-    buttons = []
+    tk.Label(janela, text='Calcular o teu IMC de baleia', font=("Arial", 16)).pack(pady=10)
 
+    tk.Label(janela, text='Peso (kg):').pack()
+    entryPeso = tk.Entry(janela)
+    entryPeso.pack(pady=5)
 
-    for i in range(9):
-        button = tk.Button(root, text='', font=('normal', 40), width= 5, height= 2, command=lambda i=i: ClicaBotao(i))
-        button.grid(row=i//3, column=i%3)
-        buttons.append(button)
-
-def abrir_nova_janela():
-    nova_janela = tk.Toplevel(root)
-    nova_janela.title("peso em tkinter")
-    nova_janela.geometry("250x150")
+    tk.Label(janela, text="Altura (cm):").pack()
+    entryAltura = tk.Entry(janela)
+    entryAltura.pack(pady=5)
     
-    # Adicionando um texto na nova janela
-    label = ttk.Label(nova_janela, text="Esta é a nova janela!")
-    label.pack(pady=20)
+
+    # labelResultado = tk.Label(janela, text="", font=("Arial", 14))
+    # labelResultado.pack(pady=5)
+
+    # labelImagem = tk.Label(janela)
+    # labelImagem.pack(pady=5)
 
 
-caminhoDoScript = os.path.dirname(os.path.abspath(__file__))
-os.chdir(caminhoDoScript)
+    def calcularImc():
+        try:
+            peso = float(entryPeso.get())
+            altura = float(entryAltura.get()) / 100
+            imc = peso / (altura ** 2)
+            #labelResultado.config(text= f"O teu peso é de {imc:.2f}Kg/m2")
 
-def calculoImc():
-    try:
-        peso = float(entryPeso.get())
-        altura = float(entryAltura.get()) / 100
-        imc = peso / (altura ** 2)
-        labelResultado.config(text= f"O teu peso é de {imc:.2f}Kg/m2")
+            if imc < 18.5:
+                imagemPath = "imc_magro.png"
+            elif imc < 24.9:
+                imagemPath = "imc_normal.png"
+            elif imc < 29.9:
+                imagemPath = "imc_sobrepeso.png"
+            elif imc < 39.9:
+                imagemPath = "imc_obeso.png"
+            else:
+                imagemPath = "imc_obeso2.png"
 
-        if imc < 18.5:
-            imagemPath = "imc_magro.png"
-        elif imc < 24.9:
-            imagemPath = "imc_normal.png"
-        elif imc < 29.9:
-            imagemPath = "imc_sobrepeso.png"
-        elif imc < 39.9:
-            imagemPath = "imc_obeso.png"
-        else:
-            imagemPath = "imc_obeso2.png"
+            imagem = tk.PhotoImage(file=imagemPath)
+            # labelImagem.config(image=imagem)
+            # labelImagem.image = imagem
 
-        imagem = PhotoImage(file=imagemPath)
-        labelImagem.config(image=imagem)
-        labelImagem.image = imagem
+        except ValueError:
+            messagebox.showerror("Erro", "Por favor insira valores válidos para peso e altura!")
+            
+    tk.Button(janela, text="calcular e avançar", command=calcularImc, bg="blue").pack(pady=5)
 
-    except ValueError:
-        messagebox.showerror("Erro", "Por favor insira valores válidos para peso e altura!")
+def meteorologia():
+    limparJanela()
+    janela.title("Meteorologiainator")
 
+    tk.Label(janela, text='Como está o tempo belo senhor?', font=("Arial", 16)).pack(pady=10)
 
-janela = Tk()
-janela.title('Calculadora de IMC')
+    tk.Label(janela, text='qual cidade?').pack()
+    entryCidade = tk.Entry(janela)
+    entryCidade.pack(pady=5)
 
-framePrincipal = Frame(janela, padx=20, pady=20)
-framePrincipal.pack()
+    resultadoLabel = tk.Label(janela, text="", wraplength=350, bg="#2E2E2E", fg="white")
+    resultadoLabel.pack(pady=10)
 
-labelTitulo = Label(framePrincipal, text='Calculadora de IMC', font=("Arial", 18))
-labelTitulo.grid(row=0, column=0, columnspan=2, pady=10)
+    iconLabel = tk.Label(janela, bg="#2E2E2E")
+    iconLabel.pack(pady=10)
 
-labelPeso = Label(framePrincipal, text='Peso (kg):')
-labelPeso.grid(row=1, column=0, pady=5, sticky="w")
-entryPeso = Entry(framePrincipal, width=10)
-entryPeso.grid(row=1, column=1, pady=5)
+    def obterDadosMeteorologicos(cidade):
+        params = {
+            'q': cidade,
+            'appid': API_KEY,
+            'units': 'metric',
+            'lang': 'pt'
+        }
+        response = requests.get(BASE_URL, params=params)
+        return response.json()
 
-labelAltura = Label(framePrincipal, text="Altura (cm):")
-labelAltura.grid(row=2, column=0, pady=5, sticky="w")
-entryAltura = Entry(framePrincipal, width=10)
-entryAltura.grid(row=2, column=1, pady=5)
+    def guardarHistorico(cidade, temperatura):
+        with open('historicoTemperaturas.txt', 'a', encoding='utf-8') as ficheiro:
+            dataHora = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            ficheiro.write(f"{dataHora} - {cidade}: {temperatura}°C\n")
 
-buttonCalcular = Button(framePrincipal, text="Calcular IMC", command=calculoImc)
-buttonCalcular.grid(row=3, column=0, columnspan=2, pady=10)
-
-labelResultado = Label(framePrincipal, text="", font=("Arial", 14))
-labelResultado.grid(row=4, column=0, columnspan=2, pady=10)
-
-labelImagem = Label(framePrincipal)
-labelImagem.grid(row=5, column=0, columnspan=2)
-
-labelImagem = sleep(10)
-
-abrir_nova_janela()
-
-def abrir_nova_janela():
-    nova_janela = tk.Toplevel(root)
-    nova_janela.title("mapa Portugal")
-    nova_janela.geometry("250x150")
-    
-    # Adicionando um texto na nova janela
-    label = ttk.Label(nova_janela, text="Esta é a nova janela!")
-    label.pack(pady=20)
-
-latitude = 39.3999
-longitude = -8.2245
-
-mapaPortugal = folium.Map(location=[latitude, longitude], zoom_start=6)
-
-folium.Marker(
-    location=[38.7167, -9.139],
-    popup='Lisboa',
-    icon=folium.Icon(icon='cloud')
-).add_to(mapaPortugal)
-
-folium.Marker(
-    location=[41.1579, -8.6291],
-    popup='Porto',
-    icon=folium.Icon(icon='green')
-).add_to(mapaPortugal)
-
-mapaPortugal.save('mapaPortugal.html')
-
-sleep(5)
-tk.Toplevel
-
-API_KEY = "3b3ddc5f98b8f6502b43eea92f40a73d"
-BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
-ICON_URL = "http://openweathermap.org/img/wn/"
-
-def obterDadosMeteorologicos(cidade):
-    params = {
-        'q': cidade,
-        'appid': API_KEY,
-        'units': 'metric',
-        'lang': 'pt'
-    }
-    response = requests.get(BASE_URL, params=params)
-    return response.json()
-
-
-def guardarHistorico(cidade, temperatura):
-    with open('historicoTemperaturas.txt', 'a', encoding='utf-8') as ficheiro:
-        dataHora = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        ficheiro.write(f"{dataHora} - {cidade}: {temperatura}°C\n")
-
-class AppMeteorologia:
-
-    def __init__(self, janela):
-        self.janela = janela
-        self.janela.title("App de Meteorologia")
-        self.janela.geometry("400x300")
-        self.janela.configure(bg="#2E2E2E")
-
-        self.cidadeLabel = tk.Label(janela, text="Cidade / País:", bg="#2E2E2E", fg="white")
-        self.cidadeLabel.pack(pady=10)
-
-        self.cidadeEntry = tk.Entry(janela, width=50)
-        self.cidadeEntry.pack(pady=10)
-
-        self.buscarButton = tk.Button(janela, text="Pesquisar", command=self.procurarMeteorologia, bg="white")
-        self.buscarButton.pack(pady=10)
-
-        self.resultadoLabel = tk.Label(janela, text="", wraplength=350, bg="#2E2E2E", fg="white")
-        self.resultadoLabel.pack(pady=10)
-
-        self.iconLabel = tk.Label(janela, bg="#2E2E2E")
-        self.iconLabel.pack(pady=10)
-
-    def procurarMeteorologia(self):
-        cidade = self.cidadeEntry.get()
+    def verOTempo():
+        cidade = entryCidade.get()
         if cidade:
             dados = obterDadosMeteorologicos(cidade)
             if dados.get("cod") != 200:
@@ -236,13 +196,61 @@ class AppMeteorologia:
                 imgTk = ImageTk.PhotoImage(img)
 
                 # Atualiza o ícone na interface
-                self.iconLabel.config(image=imgTk)
-                self.iconLabel.image = imgTk
-
-                self.resultadoLabel.config(text=f"Temperatura: {temperatura}°C\nDescrição: {descricao.capitalize()}")
+                iconLabel.config(image=imgTk)
+                iconLabel.image = imgTk
+                mensagem = f"Temperatura: {temperatura}°C\nDescrição: {descricao.capitalize()}"
+                resultadoLabel.config(text=mensagem)
                 guardarHistorico(cidade, temperatura)
+                messagebox.showinfo("Tempo Atual", mensagem)
+                criarMapa()
+
         else:
             messagebox.showerror("Erro", "Por favor, insira o nome de uma cidade")
 
+    buscarButton = tk.Button(janela, text="Pesquisar", command=verOTempo, bg="white")
+    buscarButton.pack(pady=10)
 
-root.mainloop()
+def criarMapa():
+    limparJanela()
+    janela.title("fazedor de mapas")
+
+    tk.Label(janela, text='Faz o teu mapa desempregado', font=("Arial", 16)).pack(pady=10)
+
+    cidades = ["porto", "lisboa", "faro", "Coimbra"]
+    listaEscolha = ttk.Combobox(janela, values= cidades, state="readonly")
+    listaEscolha.set("porto")
+    listaEscolha.pack(pady=10)
+
+    def fazerMapa():
+        escolha = listaEscolha.get()
+
+        if escolha == "porto":
+            coordenadas = [41.1579, -8.6291]
+        elif escolha == "lisboa":
+            coordenadas = [38.7167, -9.1390]
+        elif escolha == "faro":
+            coordenadas = [37.0194, -7.9322]
+        else:
+            coordenadas = [40.2056, -8.4195]
+
+        mapaPortugal = folium.Map(location=coordenadas, zoom_start=6)
+        folium.Marker(
+            location=coordenadas,
+            popup=escolha
+        ).add_to(mapaPortugal)
+
+        mapaPortugal.save('mapaPortugal.html')
+
+        messagebox.showinfo("parabens", "já criaste um mapa")
+        janela.destroy()
+
+    buscarButton = tk.Button(janela, text="Pesquisar", command=fazerMapa, bg="white")
+    buscarButton.pack(pady=10)
+
+janela = tk.Tk()
+janela.geometry("400x500")
+
+jogoDoGalo()
+
+janela.mainloop()
+
